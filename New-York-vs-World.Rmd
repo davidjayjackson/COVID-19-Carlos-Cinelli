@@ -1,0 +1,74 @@
+---
+title: "COVID-19 Benford Analysis"
+author: "David Jackson"
+date: "1/31/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE,error = FALSE)
+library(ggplot2)
+library(scales)
+library(RSQLite)
+library(dplyr)
+library(forecast)
+library(BenfordTests)
+library(benford.analysis)
+library(plotly)
+```
+
+## CoVID-19 New York vs The World
+
+```{r}
+rm(list=ls())
+db <- db <- dbConnect(RSQLite::SQLite(),dbname= "../COVID-19-DB/NYTimes.sqlite3")
+df <- dbGetQuery(db,"select date,state,county,new_cases,new_deaths from COUNTYDAILY")
+df <- subset(df,state %in% c("New York","Texas","Florida","Illinois",
+                            "Pennsylvania","Ohio","California",
+                             "Georgia" ))
+df$date <- as.Date(df$date,format="%Y-%m-%d")
+```
+```{r}
+
+set.seed(1234)
+nys_cases <- df %>% filter(state =="New York") %>% select(new_cases)
+nys_cases <- nys_cases$new_cases
+bfd <-benford(nys_cases,1)
+bfd2 <-benford(nys_cases,2)
+
+nys_deaths <- df %>% filter(state =="New York") %>% select(new_deaths)
+nys_deaths <- nys_deaths$new_deaths
+nys_bfd1 <-benford(nys_deaths,1)
+nys_bfd2 <-benford(nys_deaths,2)
+```
+
+## Daily Deaths
+### First Digits Analysis
+### Mean Absolute Deviation (MAD)
+
+```{r}
+MAD(nys_bfd1)
+```
+
+```{r}
+plot(nys_bfd1,multiple = FALSE)
+```
+
+### First Two Digits
+### Mean Absolute Deviation (MAD)
+
+```{r}
+MAD(nys_bfd1)
+```
+```{r}
+plot(nys_bfd1,multiple = FALSE)
+```
+### First Two Digits Deaths
+### Mean Absolute Deviation (MAD)
+
+```{r}
+MAD(nys_bfd2)
+```
+```{r}
+plot(nys_bfd2,multiple = FALSE)
+```
