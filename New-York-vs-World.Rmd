@@ -58,11 +58,12 @@ plot(nys_bfd1,multiple = FALSE)
 ### Mean Absolute Deviation (MAD)
 
 ```{r}
-MAD(nys_bfd1)
+MAD(nys_bfd2)
 ```
 ```{r}
-plot(nys_bfd1,multiple = FALSE)
+plot(nys_bfd2,multiple = FALSE)
 ```
+
 ### First Two Digits Deaths
 ### Mean Absolute Deviation (MAD)
 
