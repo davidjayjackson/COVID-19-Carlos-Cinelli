@@ -1,0 +1,111 @@
+---
+title: "Benford Analysis the Long way"
+author: "IllicitDavid Jackson"
+date: "2/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(scales)
+library(RSQLite)
+library(dplyr)
+library(forecast)
+library(BenfordTests)
+library(benford.analysis)
+library(plotly)
+```
+
+## CoVID-19 New York vs The World
+
+```{r}
+rm(list=ls())
+db <- db <- dbConnect(RSQLite::SQLite(),dbname= "../COVID-19-DB/NYTimes.sqlite3")
+df <- dbGetQuery(db,"select date,state,county,new_cases,new_deaths from COUNTYDAILY")
+df <- subset(df,state %in% c("New York","Texas","Florida","Illinois",
+                            "Pennsylvania","Ohio","California",
+                             "Georgia" ))
+df$date <- as.Date(df$date,format="%Y-%m-%d")
+
+```
+
+### Empire State: New York
+```{r}
+set.seed(1234)
+nys_cases <- df %>% filter(state =="New York") %>% select(new_cases)
+nys_cases <- nys_cases$new_cases
+bfd <-benford(nys_cases,1)
+cases <- getBfd(bfd)
+bfd2 <-benford(nys_cases,2)
+cases_two <- getBfd(bfd2)
+```
+
+### Begin Plots: first digit analysis
+
+```{r}
+cases <- cases %>% janitor::clean_names()
+cases$digits <- as.factor(cases$digits)
+```
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y=data_dist)) +
+  scale_y_continuous(labels=percent)
+```
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y=data_second_order_dist)) +
+  scale_y_continuous(labels=percent)
+```
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y=benford_dist)) +
+  scale_y_continuous(labels=percent)
+```
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y=data_dist_freq)) 
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y=benford_dist_freq)) 
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= benford_so_dist_freq))
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= data_summation)) +
+  scale_y_continuous(labels=comma)
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= abs_excess_summation)) +
+  scale_y_continuous(labels=comma)
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= difference)) +
+  scale_y_continuous(labels=comma)
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= squared_diff)) +
+  scale_y_continuous(labels=comma)
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= absolute_diff)) +
+  scale_y_continuous(labels=comma)
+  
+```
+
+```{r}
+ggplot(cases) + geom_col(aes(x=digits,y= z_statistic)) +
+  scale_y_continuous(labels=comma)
+  
+```
