@@ -19,6 +19,8 @@ library(ggplot2)
 library(scales)
 library(RSQLite)
 library(dplyr)
+library(benford.analysis)
+library(pracma)
 ```
 ```{r}
 rm(list=ls())
@@ -28,10 +30,6 @@ df <- df[order(df$date),]
 df$date <- as.Date(df$date)
 oh <- subset(df,state =="Ohio" & date >="2020-03-10" )
 
-summary(oh$new_cases,na.rm=TRUE)
-summary(oh$new_deaths,na.rm=TRUE)
-library(benford.analysis)
-library(pracma)  ## Inclused a funcion to do various rolling means calc.
 ```
 
 ## Comparison of Ohio Cases and Deaths
@@ -40,13 +38,11 @@ library(pracma)  ## Inclused a funcion to do various rolling means calc.
 oh$mad7 <- movavg(oh$new_deaths,7, type="e")
 oh$mad28 <- movavg(oh$new_deaths,28, type="e")
 
-ggplot(oh) + geom_line(aes(x=date,y=mad7)) +
-  labs(title="Ohio Deaths: 7 Day Moving Average") +
-  ylim(0,90)
+ggplot(oh) + geom_line(aes(x=date,y=mad7,col="7 Day")) +
+   geom_line(aes(x=date,y=mad28,col="28 Day")) +
+  labs(title="Ohio Deaths: 7 & 28  Day Moving Averages") +
+  ylim(0,125)
 
-ggplot(oh) + geom_line(aes(x=date,y=mad28)) +
-  labs(title="Ohio Deaths: 28 Day Moving Average") +
-  ylim(0,90)
 
 ```
 
@@ -68,7 +64,6 @@ plot(bl_deaths2,multiple = FALSE,select="digits")
 * Source: https://www.nytimes.com/2021/01/28/nyregion/nursing-home-deaths-cuomo.html
 * Quote,"N.Y. Severely Undercounted Virus Deaths in Nursing Homes,(AG)
 
-
 ```{r}
 new_york <- subset(df,state =="New York")
 ny_cases <- new_york %>% select(new_cases)
@@ -80,20 +75,17 @@ ny_deaths <- new_york %>% select(new_deaths)
 new_york$mad7 <- movavg(new_york$new_deaths,7, type="e")
 new_york$mad28 <- movavg(new_york$new_deaths,28, type="e")
 
-ggplot(new_york) + geom_line(aes(x=date,y=mad7)) +
-  labs(title="New York Deaths: 7 Day Moving Average") 
+ggplot(new_york) + geom_line(aes(x=date,y=mad7, col="7 Day")) +
+  geom_line(aes(x=date,y=mad28,col="28 Day")) +
+  labs(title="New York Deaths: 7 & 28 Day Moving Averages") 
   
-
-ggplot(new_york) + geom_line(aes(x=date,y=mad28)) +
-  labs(title="New York Deaths: 28 Day Moving Average")
-
 ```
+
 ## New York State's Daily Deaths: First and First Two Digits
 
 ```{r}
 bl_deaths <- benford(ny_deaths$new_deaths,1)
 plot(bl_deaths,multiple = FALSE,select="digits")
-#
 bl_deaths2 <- benford(ny_deaths$new_deaths,2)
 plot(bl_deaths2,multiple = FALSE,select="digits")
 ```
